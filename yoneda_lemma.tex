@@ -1,0 +1,243 @@
+\documentclass[a4paper]{amsart}            %for bookmarks enable option [liststotoc]%
+
+
+
+%-------packages-------------------------%
+
+
+\usepackage{amsmath}
+\usepackage{amsthm}        % Does theorem stuff
+\usepackage{amssymb} 
+\usepackage{xypic}  				%for strange reason I need this to make the two cell diagrams				
+\usepackage[2cell]{xy} 			%for commutative diagrams%
+
+\usepackage{color,hyperref}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.3}                      %pdf book marks the way I like%
+\hypersetup{pdftex=true, colorlinks=true, breaklinks=true, linkcolor=darkblue, menucolor=darkblue, pagecolor=darkblue, urlcolor=darkblue}
+
+
+
+%-----------style------------------------%
+
+\addtolength{\parskip}{\baselineskip} %Absätze im Text werden auch tatsächlich zu Absätzen%
+\parindent 0pt
+
+%----------new--commands-----------------%
+
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\ve}{\varepsilon}
+\newcommand{\Mor}{\mathrm{Mor}}
+\newcommand{\id}{\operatorname{id}}
+\newcommand{\Hom}{\operatorname{Hom}}
+%this command was proposed by Stefan_K%
+\newcommand*{\leftterm}{\left\{\substack{\normalsize \text{natural transformations}
+  \\h^A \rightarrow F} \right\}}
+\newlength{\leftside}
+\settowidth{\leftside}{$\leftterm$}
+
+% the following code will uplift the \maketitle title. In standard it is way too low.
+\makeatletter % wegen @ in den Befehsnamen
+\renewcommand*\@maketitle{%
+  \normalfont\normalsize
+  \@adminfootnotes
+  \@mkboth{\@nx\shortauthors}{\@nx\shorttitle}%
+% (SCHW) auskommentiert:  \global\topskip42\p@\relax % 5.5pc   "   "   "     "     "
+  \@settitle
+  \ifx\@empty\authors \else \@setauthors \fi
+  \ifx\@empty\@dedicatory
+  \else
+    \baselineskip18\p@
+    \vtop{\centering{\footnotesize\itshape\@dedicatory\@@par}%
+      \global\dimen@i\prevdepth}\prevdepth\dimen@i
+  \fi
+  \@setabstract
+  \normalsize
+  \if@titlepage
+    \newpage
+  \else
+    \dimen@34\p@ \advance\dimen@-\baselineskip
+    \vskip\dimen@\relax
+  \fi
+} % end \@maketitle
+\makeatother
+
+%--------new--enviroments----------------%
+
+\renewcommand{\theequation}{\thesection.\arabic{equation}}         %%                             %I somehow need this for the warning symbol to work 
+ \makeatletter                                                      %%                             properly, I don't really know why though%
+    \@addtoreset{equation}{section} % Make the equation counter reset each section
+    \@addtoreset{footnote}{section} % Make the footnote counter reset each section
+                                                                    %%
+ \newenvironment{warning}[1][]{%                                    %%
+    \begin{trivlist} \item[] \noindent%                             %%
+    \begingroup\hangindent=2pc\hangafter=-2                         
+    \clubpenalty=10000%                                             											This is my current proof environment look below for another version
+    \hbox to0pt{\hskip-\hangindent\manfntsymbol{127}\hfill}\ignorespaces%
+    \refstepcounter{equation}\textbf{Warning~\theequation}%         
+    \@ifnotempty{#1}{\the\thm@notefont \ (#1)}\textbf{.}            
+    \let\p@@r=\par \def\p@r{\p@@r \hangindent=0pc} \let\par=\p@r}%  
+    {\hspace*{\fill}$\lrcorner$\endgraf\endgroup\end{trivlist}}  
+    
+    
+%\newenvironment{beweis}{\par\begingroup%
+%\settowidth{\leftskip}{\emph{Proof.~}}%																											remove to use \begin{beweis}
+%\noindent\llap{\emph{Proof.~}}}{\hfill$\Box$\par\endgroup}     
+    
+  
+
+\renewenvironment{proof}[1][\proofname]{\par
+  \pushQED{\qed}%
+  \normalfont 
+  \trivlist
+  \leftskip=0.5cm
+  \item[\hskip\labelsep
+        \itshape
+    #1\@{.}]\mbox{ }\par\noindent%
+  \leftskip=1cm
+  \rightskip=1cm
+}{%
+  \popQED\endtrivlist\@}    
+
+\makeatother
+      
+
+\theoremstyle{plain}                                               %%
+ \newtheorem{theorem}[equation]{Theorem}                            %%
+ \newtheorem*{claim}{Claim}                                         %%
+ \newtheorem*{lemma*}{Lemma}                                        %%
+ \newtheorem*{theorem*}{Theorem}                                    %%
+ \newtheorem{lemma}[equation]{Lemma}                                %%
+ \newtheorem{corollary}[equation]{Corollary}                        %%
+ \newtheorem{proposition}[equation]{Proposition}                    %%
+
+%--produce-the-warning--symbol-----------%
+ \DeclareFontFamily{U}{manual}{}                                
+ \DeclareFontShape{U}{manual}{m}{n}{ <->  manfnt }{}            
+ \newcommand{\manfntsymbol}[1]{%                                
+    {\fontencoding{U}\fontfamily{manual}\selectfont\symbol{#1}}}
+
+\makeatother
+
+
+\begin{document}
+
+%------------header----------------------%
+
+\title{Yoneda lemma}
+%\author{Felix Hoffmann}% %for now I decided against it%
+
+
+\maketitle
+\pagestyle{empty} %no pagenumbers and titles%
+\thispagestyle{empty}
+
+
+%-------end header-----------------------%
+
+Given a category $\C$, we can form a category $\textbf{Set}^{\C}$, consisting of all functors ${\C \rightarrow \textbf{Set}}$ with natural transformations 
+as morphisms. The composition of morphisms in $\textbf{Set}^{\C}$ is then just the vertical composition of natural transformations.
+
+One easily sees that this composition is asscociative and for all functors ${F: \C \rightarrow \textbf{Set}}$ the natural transformation $F \rightarrow F$
+with components $\id_{C}$ is an identity, thus we have indeed a category. We call $\textbf{Set}^{\C}$ the \emph{functor category} of functors from
+$\C$ to $\textbf{Set}$.
+
+For each object $A$ in $\C$ we obtain a special functor ${\C \rightarrow \textbf{Set}}$ called the \emph{Hom-functor} of $A$. It sends each object $X$
+in $\C$ to the Hom-Set $\Mor_{\C}$.
+
+\begin{align*}h^A: &&\mathcal{C} 			           	      &\longrightarrow \textbf{Set} \\      
+     &&X 								                 	&\longmapsto \Mor_{\C}(A,X)   \\
+     &&\left(X \xrightarrow{f} Y\right) 	&\longmapsto \left({\begin{aligned} \Mor_{\C}(A,X) &\xrightarrow{h^A(f)} \Mor_{\C}(A,Y)	\\
+																								  	                               A \to X  &\longmapsto	\xymatrix@=+0.1cm{A \ar[rr] \ar[rdd] & 				      & Y \\
+																												 							 																		                                     &              &   \\
+																												 																										                                   &X \ar[uur]^{f}&     }
+                                                              \end{aligned}}\right)\end{align*}
+
+In order to secure that the Hom-sets are indeed sets, we demand that $\C$ is \emph{locally small}.
+
+\textbf{Yoneda's lemma} now states that there is a bijection between the set of natural transformations $h^A \rightarrow F$ and the set $F(A)$ for any 
+functor $F: \C \rightarrow \textbf{Set}$.%
+%
+\begin{proof}%
+Given a natural transformation $h^A \rightarrow F$ with components $m_C$ we define the map
+%
+\begin{align*}f: \leftterm &\longrightarrow F(A) \\
+  \makebox[\leftside]{h^A \rightarrow F} &\longmapsto m_A(\id_A)\end{align*}
+%
+Obviously it is well defined, we now check for surjectivity and injectivity.
+
+For $c \in F(A)$ we just define a natural transformation by assigning $\id_A \mapsto c$ via the component $m_A$. 
+This not only gives a natural transformation - it is actually completely determined by that assignment: 
+
+To see this consider any object $X$ in $\C$. We need to give a map 
+\begin{equation*}
+{h^A(X)=\Mor (A,X) \rightarrow F(X)}.
+\end{equation*}
+If $\Mor (A,X)$ is empty, there there is only one possible choice. Else let $g \in \Mor (A,X)$. Then we consider the diagram
+%
+%
+\begin{equation*}
+\xymatrix @+=1.55cm{\Mor (A,A) \ar[r]^{g \circ -} \ar[d]_{m_A} & \Mor(A,X) \ar[d]^{m_X} \\
+					F(A) \ar[r]^{F(g)} 															 & F(X)                     }
+\end{equation*}
+%
+%
+in which we don't know the vertical arrows, but we \emph{do} know two things:
+%
+\begin{equation*}
+\id_A \mapsto m_A(\id_A)=c 
+\end{equation*}
+%
+and that the diagram has to constitute a naturality square.
+
+Thus we get, by tracking $\id_A$,
+
+\begin{equation*}
+\boxed{m_X(g \circ \id_A)=F(g) \circ m_A(\id_A)}.
+\end{equation*}
+
+Thus $m_X(g)$ is completely determined by $m_A(\id_A)$.
+\end{proof}
+
+\begin{lemma}
+	Let $F:\C \to \D$ be fully faithful functor. Then, whenever $F(X) \xrightarrow{F(f)} F(X')$ is an isomorphism in $\D$, $X \xrightarrow{f} X'$ is an isomorphism in $\C$.
+\end{lemma}
+
+\medskip
+
+\begin{corollary}
+	Fully faithful functors are essentially injective.
+\end{corollary}
+
+\begin{proof}%
+	Let $F(X) \xrightarrow{F(f)} F(X')$ be an isomorphism. Then there exists 
+	\vspace{0.2cm}
+	\begin{equation*}
+			\varphi \in \Mor_\D(F(X'),F(X))
+		\vspace{0.2cm}
+	\end{equation*}	
+	such that $F(f) \circ \varphi=\id_{F(X')}$, $\varphi \circ F(f)=\id_{F(X)}$. 
+	
+	Since $F$ is fully faithful there exists a morphism $g \in \Mor(X,X')$, 
+	such that $F(g)=\varphi$. 
+	(This is the injectivity of the map $\Mor(X,X') \to \Mor(F(X),F(X'))$.)
+	
+	Then we have 
+	\vspace{0.2cm}
+	\begin{equation*}
+		F(g \circ f)=F(g) \circ F(f)=\id_{F(X)}=F(\id_X).
+	\vspace{0.2cm}
+	\end{equation*}
+	Injectivity then gives $g \circ f=\id_X$ amd similarily $f \circ g=\id_{X'}$.%
+\end{proof}
+
+In summary one can say:
+
+\emph{Fully faithful functors reflect isomorphisms.}
+
+
+
+
+\end{document}
