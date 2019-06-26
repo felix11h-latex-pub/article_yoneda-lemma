@@ -99,7 +99,7 @@
   \leftskip=1cm
   \rightskip=1cm
 }{%
-  \popQED\endtrivlist\@}    
+  \popQED\endtrivlist\unhbox \voidb@x\@}    
 
 \makeatother
       
@@ -164,7 +164,7 @@ functor $F: \C \rightarrow \textbf{Set}$.%
 Given a natural transformation $h^A \rightarrow F$ with components $m_C$ we define the map
 %
 \begin{align*}f: \leftterm &\longrightarrow F(A) \\
-  \makebox[\leftside]{h^A \rightarrow F} &\longmapsto m_A(\id_A)\end{align*}
+  \makebox[\leftside]{$h^A \rightarrow F$} &\longmapsto m_A(\id_A)\end{align*}
 %
 Obviously it is well defined, we now check for surjectivity and injectivity.
 
